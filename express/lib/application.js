@@ -5,7 +5,7 @@ function Application() {
   this._router = new Router();
 }
 
-Application.prototype.get = function(path, handler) {
+Application.prototype.get = function(path, ...handler) {
   this._router.get(path, handler);
 }
 

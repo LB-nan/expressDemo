@@ -3,6 +3,7 @@ const methods = require('methods');
 
 function Route() {
   this.stack = [];
+  this.methods = {}; // 存放加载过的方法 用来做判断是否有这个方法
 }
 
 Route.prototype.dispatch = function(req, res, out) {
@@ -36,6 +37,7 @@ methods.forEach(method => {
       // 子route里面的路径没意义，随意填，因为外层的router已经存了
       let layer = new Layer('/', handler);
       layer.method = method;
+      this.methods[method] = true;
       this.stack.push(layer);
     })
   }

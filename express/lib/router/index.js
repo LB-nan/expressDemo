@@ -56,7 +56,13 @@ Router.prototype.handle = function(req, res, done) {
     if (layer.match(pathname)) {
       // 如果匹配到了，就让layer上的handler执行, handler就是上面的route.dispatch  ---- new Layer(path, route.dispatch.bind(route));
       // 将调用路由系统中下一层的控制权限交给route.dispatch
-      layer.handler_request(req, res, next);
+
+      // 如果用户注册过方法就执行，如果没注册过就next
+      if (layer.route.methods[req.method.toLowerCase()]) {
+        layer.handler_request(req, res, next);
+      } else {
+        next();
+      }
     } else {
       // 当前没有匹配到就继续下一个匹配
       next();

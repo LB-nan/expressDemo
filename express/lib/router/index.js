@@ -40,6 +40,18 @@ methods.forEach(method => {
   }
 })
 
+Router.prototype.use = function(path, ...handlers) {
+  if (typeof path === 'function') {
+    handlers.unshift(path);
+    path = '/';
+  }
+  for (let i = 0; i < handlers.length; i++) {
+    let layer = new Layer(path, handlers[i]);
+    // 中间件不需要route
+    layer.route = undefined;
+    this.stack.push(layer);
+  }
+}
 
 Router.prototype.handle = function(req, res, done) {
   let { pathname } = url.parse(req.url);
@@ -58,11 +70,18 @@ Router.prototype.handle = function(req, res, done) {
       // 将调用路由系统中下一层的控制权限交给route.dispatch
 
       // 如果用户注册过方法就执行，如果没注册过就next
-      if (layer.route.methods[req.method.toLowerCase()]) {
+
+      // 中间件没有方法
+      if (!layer.route) {
         layer.handler_request(req, res, next);
       } else {
-        next();
+        if (layer.route.methods[req.method.toLowerCase()]) {
+          layer.handler_request(req, res, next);
+        } else {
+          next();
+        }
       }
+
     } else {
       // 当前没有匹配到就继续下一个匹配
       next();

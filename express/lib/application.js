@@ -21,10 +21,15 @@ methods.forEach(method => {
   }
 })
 
+Application.prototype.use = function() {
+  this.lazy_route();
+  this._router.use(...arguments);
+}
 
 Application.prototype.listen = function(port) {
   const server = http.createServer((req, res) => {
     this.lazy_route();
+
     function done() {
       res.end(`Cannot ${req.method} ${req.url}`);
     }

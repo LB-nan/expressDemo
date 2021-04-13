@@ -1,17 +1,19 @@
-const express = require('express');
+const express = require('./express');
 
 const app = express();
 
 app.use((req, res, next) => {
-  if (req.query.a == 1) {
-    next();
-  } else {
-    res.send('没有权限');
-  }
+  console.log(222)
+  next();
+  // if (req.query.a == 1) {
+
+  // } else {
+  //   res.send('没有权限');
+  // }
 })
 
 app.get('/', function(req, res) {
-  res.send('有权限，通过了');
+  res.end('ok');
 })
 
 app.listen(3000, () => {

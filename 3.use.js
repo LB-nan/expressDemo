@@ -1,10 +1,10 @@
-const express = require('./express');
+const express = require('express');
 
 const app = express();
 
 app.use((req, res, next) => {
   console.log(222)
-  next();
+  next('出错了');
   // if (req.query.a == 1) {
 
   // } else {

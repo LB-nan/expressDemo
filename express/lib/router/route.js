@@ -8,7 +8,9 @@ function Route() {
 
 Route.prototype.dispatch = function(req, res, out) {
   let idx = 0;
-  let next = () => {
+  let next = (err) => {
+    err && out(err); // 错误处理 
+
     // 如果遍历完全栈都没有找到的话就去找下一层
     if (idx >= this.stack.length) {
       return out();

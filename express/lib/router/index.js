@@ -56,7 +56,8 @@ Router.prototype.use = function(path, ...handlers) {
 Router.prototype.handle = function(req, res, done) {
   let { pathname } = url.parse(req.url);
   let idx = 0;
-  let next = () => {
+  let next = (err) => {
+
     // 如果遍历完全栈都没有找到的话就404
     if (idx >= this.stack.length) {
       return done();
@@ -64,27 +65,41 @@ Router.prototype.handle = function(req, res, done) {
 
     let layer = this.stack[idx++];
 
-    // 如果匹配到路由
-    if (layer.match(pathname)) {
-      // 如果匹配到了，就让layer上的handler执行, handler就是上面的route.dispatch  ---- new Layer(path, route.dispatch.bind(route));
-      // 将调用路由系统中下一层的控制权限交给route.dispatch
+    if (err) { // 错误处理
 
-      // 如果用户注册过方法就执行，如果没注册过就next
-
-      // 中间件没有方法
       if (!layer.route) {
-        layer.handler_request(req, res, next);
-      } else {
-        if (layer.route.methods[req.method.toLowerCase()]) {
-          layer.handler_request(req, res, next);
+        if (layer.handler.length !== 4) {
+          layer.hander_error(err, req, res, next);
         } else {
           next();
         }
+      } else {
+        next(err);
       }
-
     } else {
-      // 当前没有匹配到就继续下一个匹配
-      next();
+
+      // 如果匹配到路由
+      if (layer.match(pathname)) {
+        // 如果匹配到了，就让layer上的handler执行, handler就是上面的route.dispatch  ---- new Layer(path, route.dispatch.bind(route));
+        // 将调用路由系统中下一层的控制权限交给route.dispatch
+
+        // 如果用户注册过方法就执行，如果没注册过就next
+
+        // 中间件没有方法
+        if (!layer.route) {
+          layer.handler_request(req, res, next);
+        } else {
+          if (layer.route.methods[req.method.toLowerCase()]) {
+            layer.handler_request(req, res, next);
+          } else {
+            next();
+          }
+        }
+
+      } else {
+        // 当前没有匹配到就继续下一个匹配
+        next();
+      }
     }
   }
   next();
